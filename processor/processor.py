@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 from utils.meter import AverageMeter
 from utils.metrics import R1_mAP_eval
-from torch.cuda import amp
+from torch import amp
 import torch.distributed as dist
 
 def do_train(cfg,
@@ -54,8 +54,12 @@ def do_train(cfg,
             target = vid.to(device)
             target_cam = target_cam.to(device)
             target_view = target_view.to(device)
-            with amp.autocast(enabled=True):
+            with amp.autocast(device_type='cuda', dtype=torch.float16):
                 score, feat = model(img, target, cam_label=target_cam, view_label=target_view)
+                #print("target tensor:", target)
+                #print("target dtype:", target.dtype)
+                #print("target shape:", target.shape)
+                #print("min target:", target.min().item(), "max target:", target.max().item())
                 loss = loss_fn(score, feat, target, target_cam)
 
             scaler.scale(loss).backward()

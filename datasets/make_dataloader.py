@@ -30,6 +30,13 @@ def train_collate_fn(batch):
     """
     imgs, pids, camids, viewids , _ = zip(*batch)
     pids = torch.tensor(pids, dtype=torch.int64)
+    viewid_map = {
+        'gt': 0,
+        'gt_train_half': 1,
+        'gt_val_half': 2
+    }
+
+    viewids = [viewid_map.get(v, -1) for v in viewids]
     viewids = torch.tensor(viewids, dtype=torch.int64)
     camids = torch.tensor(camids, dtype=torch.int64)
     return torch.stack(imgs, dim=0), pids, camids, viewids,
@@ -61,6 +68,7 @@ def make_dataloader(cfg):
     train_set = ImageDataset(dataset.train, train_transforms)
     train_set_normal = ImageDataset(dataset.train, val_transforms)
     num_classes = dataset.num_train_pids
+    num_classes = num_classes + 1
     cam_num = dataset.num_train_cams
     view_num = dataset.num_train_vids
 

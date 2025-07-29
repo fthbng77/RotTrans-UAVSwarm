@@ -136,7 +136,7 @@ class Backbone(nn.Module):
         print('Loading pretrained model from {}'.format(trained_path))
 
     def load_param_finetune(self, model_path):
-        param_dict = torch.load(model_path)
+        param_dict = torch.load(model_path, weights_only=False)
         for i in param_dict:
             self.state_dict()[i].copy_(param_dict[i])
         print('Loading pretrained model for finetuning from {}'.format(model_path))
@@ -152,7 +152,10 @@ class build_transformer(nn.Module):
         self.cos_layer = cfg.MODEL.COS_LAYER
         self.neck = cfg.MODEL.NECK
         self.neck_feat = cfg.TEST.NECK_FEAT
-        self.in_planes = 768
+        if cfg.MODEL.TRANSFORMER_TYPE == 'deit_small_patch16_224_TransReID':
+            self.in_planes = 384
+        else:
+            self.in_planes = 768
 
         print('using Transformer_type: {} as a backbone'.format(cfg.MODEL.TRANSFORMER_TYPE))
 
@@ -240,7 +243,7 @@ class build_transformer(nn.Module):
                 return global_feat
 
     def load_param(self, trained_path):
-        param_dict = torch.load(trained_path)
+        param_dict = torch.load(trained_path,  weights_only=False)
         for i in param_dict:
             self.state_dict()[i.replace('module.', '')].copy_(param_dict[i])
         print('Loading pretrained model from {}'.format(trained_path))
@@ -260,7 +263,10 @@ class build_transformer_local(nn.Module):
         self.cos_layer = cfg.MODEL.COS_LAYER
         self.neck = cfg.MODEL.NECK
         self.neck_feat = cfg.TEST.NECK_FEAT
-        self.in_planes = 768
+        if cfg.MODEL.TRANSFORMER_TYPE == 'deit_small_patch16_224_TransReID':
+            self.in_planes = 384
+        else:
+            self.in_planes = 768
 
         print('using Transformer_type: {} as a backbone'.format(cfg.MODEL.TRANSFORMER_TYPE))
 

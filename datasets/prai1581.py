@@ -14,10 +14,15 @@ from .bases import BaseImageDataset
 
 class PRAI1581(BaseImageDataset):
 
-    def __init__(self, root='/data0/ReIDData/',
+    def __init__(self, root='./data',
                  verbose=False, **kwargs):
         super(PRAI1581, self).__init__()
-        self.dataset_dir = '/data0/ReIDData/PRAI-1581/partition/'
+        root = os.environ.get('REID_DATA_ROOT', root)
+        root = osp.expanduser(root)
+        if osp.isdir(osp.join(root, 'PRAI-1581', 'partition')):
+            self.dataset_dir = osp.join(root, 'PRAI-1581', 'partition')
+        else:
+            self.dataset_dir = root
 
         self.train_dir = osp.join(self.dataset_dir, 'bounding_box_train')
         self.query_dir = osp.join(self.dataset_dir, 'query')

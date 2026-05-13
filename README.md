@@ -102,6 +102,59 @@ cd RotTrans-UAVSwarm
 pip install -r requirements.txt
 ```
 
+### Portabilite Notu
+
+Tum yollar artik kullanici-bagimsiz. Iki seceneginiz var:
+
+1. **Default:** Veri setlerini repo-koku altinda `./data/` icine yerlestirin. Tum YAML configleri bu yolu kullanir.
+2. **Ozel konum:** `REID_DATA_ROOT` environment degiskenini set edin; tum dataset loader'lar bunu okur.
+
+   ```bash
+   export REID_DATA_ROOT=/path/to/your/datasets
+   ```
+
+   Ya da YAML icindeki `DATASETS.ROOT_DIR` degerini override edin:
+
+   ```bash
+   python train.py --config_file configs/UAV-Swarm/vit_transreid_stride_384.yml \
+       DATASETS.ROOT_DIR /path/to/your/data
+   ```
+
+Pretrained agirlik yollari (`MODEL.PRETRAIN_PATH`) artik `~/.cache/torch/checkpoints/` kullanir; her kullanicinin home dizinine otomatik genisler.
+
+### Beklenen Veri Seti Dizini
+
+```
+data/                             # REID_DATA_ROOT veya DATASETS.ROOT_DIR
+├── train/                        # UAV-Swarm
+│   ├── UAVSwarm-01/
+│   │   ├── img1/000001.jpg ...
+│   │   └── gt/000001.txt ...
+│   └── UAVSwarm-XX/...
+│
+├── uav_reid_data/                # UAV-Human
+│   ├── bounding_box_train/
+│   ├── query/
+│   └── bounding_box_test/
+│
+├── PRAI-1581/partition/          # PRAI-1581
+│   ├── bounding_box_train/
+│   ├── query/
+│   └── bounding_box_test/
+│
+├── VRAI/                         # VRAI
+│   ├── train-partition/
+│   ├── images_train/
+│   └── submission-partition-dev/
+│       ├── query/
+│       └── gallery/
+│
+└── UAV-VeID/                     # UAV-VeID
+    ├── train/
+    ├── query/
+    └── gallery/
+```
+
 ### Bagimliliklar
 
 - Python 3.8+
@@ -121,8 +174,16 @@ pip install -r requirements.txt
 
 ### Pretrained Agirliklari Indirme
 
-DeiT-Small pretrained agirliklarini indirin ve `~/.cache/torch/checkpoints/` dizinine yerlestin:
-- `deit_small_patch16_224.pth`
+DeiT-Small pretrained agirliklarini otomatik indirmek icin:
+
+```bash
+python configs/UAV-Swarm/s.py
+```
+
+Bu betik `~/.cache/torch/checkpoints/deit_small_patch16_224.pth` dosyasini olusturur. Diger modeller icin (ViT-Base 224/384) ayni dizine manual yerlestirme:
+
+- `~/.cache/torch/checkpoints/jx_vit_base_p16_224-80ecf9dd.pth`
+- `~/.cache/torch/checkpoints/jx_vit_base_p16_384-83fb41ba.pth`
 
 ### Egitim
 
@@ -153,16 +214,14 @@ Cikti olarak **CMC (Rank-1, Rank-5, Rank-10)**, **mAP** ve **mINP** metrikleri r
 
 ### Gercek Zamanli Takip (YOLO + ReID)
 
-`test_rt_v2.py` dosyasindaki ayarlari duzenleyin:
-
-```python
-FRAMES_DIR = "/path/to/frames/"        # Kare goruntulerin dizini
-YOLO_WEIGHTS = "best.pt"               # YOLO model agirliklari
-REID_WEIGHT = "/path/to/transformer_50.pth"  # ReID model agirliklari
-```
+Argumanlari CLI uzerinden gecirin:
 
 ```bash
-python test_rt_v2.py
+python test_rt_v2.py \
+    --frames_dir /path/to/frames/ \
+    --yolo_weights best.pt \
+    --reid_weight ./output/uavswarm/transformer_50.pth \
+    --cfg_file configs/UAV-Swarm/vit_transreid_stride_384.yml
 ```
 
 Ciktilar `tracking_out/` dizinine kaydedilir:
@@ -171,16 +230,14 @@ Ciktilar `tracking_out/` dizinine kaydedilir:
 
 ### Gorsel Eslestirme Sonuclari
 
-`test_vis.py` dosyasindaki yollari duzenleyin:
-
-```python
-query_dir = "/path/to/query"
-gallery_dir = "/path/to/gallery"
-weight_path = "/path/to/transformer_50.pth"
-```
+Argumanlari CLI uzerinden gecirin:
 
 ```bash
-python test_vis.py
+python test_vis.py \
+    --query_dir /path/to/query \
+    --gallery_dir /path/to/gallery \
+    --weight ./output/uavswarm/transformer_50.pth \
+    --config_file configs/UAV-Swarm/vit_transreid_stride_384.yml
 ```
 
 Her sorgu goruntusu icin en yakin 5 galeri eslesmesini `visual_results/` dizinine kaydeder.

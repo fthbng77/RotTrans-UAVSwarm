@@ -3,8 +3,17 @@ from .bases import BaseImageDataset
 import pdb
 
 class UAVSwarmDataset:
-    def __init__(self, root):
-        self.root = '/home/fatih/github/RotTrans/data/train'
+    def __init__(self, root='./data', **kwargs):
+        root = os.environ.get('REID_DATA_ROOT', root)
+        root = os.path.expanduser(root) if root else './data'
+        candidate = os.path.join(root, 'train')
+        self.root = candidate if os.path.isdir(candidate) else root
+        if not os.path.isdir(self.root):
+            raise RuntimeError(
+                f"UAVSwarm dataset root '{self.root}' not found. "
+                f"Set DATASETS.ROOT_DIR in config or REID_DATA_ROOT env var. "
+                f"Expected layout: <root>/train/UAVSwarm-XX/{{img1,gt}}/"
+            )
         self.train = self.load_train()
         all_ids = [pid for _, pid, _, _ in self.train]
         print(f"[DEBUG] Max label in dataset: {max(all_ids)}, Total unique IDs: {len(set(all_ids))}")

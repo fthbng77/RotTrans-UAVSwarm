@@ -20,7 +20,9 @@ class UAVHuman(BaseImageDataset):
     def __init__(self, root='./data',
                  verbose=True, **kwargs):
         super(UAVHuman, self).__init__()
-        self.dataset_dir = '/data0/ReIDData/uav_reid_data/'
+        import os
+        root = os.environ.get('REID_DATA_ROOT', root)
+        self.dataset_dir = osp.expanduser(root)
         self.train_dir = osp.join(self.dataset_dir, 'bounding_box_train')
 
 

@@ -1,6 +1,6 @@
 MODEL:
   PRETRAIN_CHOICE: 'imagenet'
-  PRETRAIN_PATH: '/home/fatih/.cache/torch/checkpoints/deit_small_patch16_224.pth'
+  PRETRAIN_PATH: '~/.cache/torch/checkpoints/deit_small_patch16_224.pth'
   METRIC_LOSS_TYPE: 'triplet'
   IF_LABELSMOOTH: 'off'
   IF_WITH_CENTER: 'no'
@@ -25,7 +25,7 @@ INPUT:
 
 DATASETS:
   NAMES: ('uavswarm')
-  ROOT_DIR: ('')
+  ROOT_DIR: ('./data')
 
 DATALOADER:
   SAMPLER: 'softmax_triplet'

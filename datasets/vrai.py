@@ -14,15 +14,18 @@ from .bases import BaseImageDataset
 
 class VRAI(BaseImageDataset):
 
-    def __init__(self, root='/data0/ReIDData/',
+    def __init__(self, root='./data',
                  verbose=False, **kwargs):
         super(VRAI, self).__init__()
-        self.dataset_dir = '/data0/ReIDData/VRAI/train-partition/'
+        root = os.environ.get('REID_DATA_ROOT', root)
+        root = osp.expanduser(root)
+        base = osp.join(root, 'VRAI') if osp.isdir(osp.join(root, 'VRAI')) else root
+        self.dataset_dir = osp.join(base, 'train-partition')
 
-        self.train_dir = '/data0/ReIDData/VRAI/images_train/'
+        self.train_dir = osp.join(base, 'images_train')
 
-        self.query_dir = '/data0/ReIDData/VRAI/submission-partition-dev/query/'
-        self.gallery_dir = '/data0/ReIDData/VRAI/submission-partition-dev/gallery/'
+        self.query_dir = osp.join(base, 'submission-partition-dev', 'query')
+        self.gallery_dir = osp.join(base, 'submission-partition-dev', 'gallery')
 
         self._check_before_run()
 

@@ -1,6 +1,6 @@
 MODEL:
   PRETRAIN_CHOICE: 'imagenet'
-  PRETRAIN_PATH: '/home/chenshuoyi/.cache/torch/checkpoints/jx_vit_base_p16_224-80ecf9dd.pth'
+  PRETRAIN_PATH: '~/.cache/torch/checkpoints/jx_vit_base_p16_224-80ecf9dd.pth'
   METRIC_LOSS_TYPE: 'triplet'
   IF_LABELSMOOTH: 'off'
   IF_WITH_CENTER: 'no'
@@ -25,7 +25,7 @@ INPUT:
 
 DATASETS:
   NAMES: ('uavhuman')
-  ROOT_DIR: ('/data/ReIDData/uav_reid_data/submit_trans_reid/')
+  ROOT_DIR: ('./data/uav_reid_data/')
 
 DATALOADER:
   SAMPLER: 'softmax_triplet'

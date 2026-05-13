@@ -1,4 +1,4 @@
-import os, cv2, time, json, numpy as np
+import os, cv2, time, json, argparse, numpy as np
 from glob import glob
 from collections import deque
 
@@ -14,33 +14,52 @@ from datetime import datetime
 from config import cfg
 from model import make_model
 
-########################################
-# KULLANICI AYARLARI
-########################################
-FRAMES_DIR = "/home/fatih/github/RotTrans/data/Test_Swarm_UAV_RE-ID_08.08/UAVSwarm-FB/img1/"     
-test_name = os.path.basename(os.path.dirname(FRAMES_DIR.rstrip('/')))
+
+def parse_args():
+    p = argparse.ArgumentParser(description="YOLO + ReID realtime tracker")
+    p.add_argument('--frames_dir', required=True, help='Directory of frame images (.jpg/.png)')
+    p.add_argument('--yolo_weights', default='best.pt', help='YOLO weights file')
+    p.add_argument('--reid_weight', required=True, help='ReID weights (.pth)')
+    p.add_argument('--cfg_file', default='configs/UAV-Swarm/vit_transreid_stride_384.yml')
+    p.add_argument('--output_dir', default='./tracking_out')
+    p.add_argument('--num_class', type=int, default=122)
+    p.add_argument('--make_video', action='store_true', default=True)
+    p.add_argument('--fps', type=int, default=25)
+    p.add_argument('--yolo_conf', type=float, default=0.25)
+    p.add_argument('--yolo_iou', type=float, default=0.5)
+    p.add_argument('--yolo_imgsz', type=int, default=1280)
+    p.add_argument('--cos_thresh', type=float, default=0.55)
+    p.add_argument('--iou_thresh', type=float, default=0.3)
+    p.add_argument('--lost_ttl', type=float, default=10.0)
+    p.add_argument('--ema_alpha', type=float, default=0.8)
+    return p.parse_args()
+
+
+args = parse_args()
+
+FRAMES_DIR = os.path.expanduser(args.frames_dir)
+assert os.path.isdir(FRAMES_DIR), f"frames_dir not found: {FRAMES_DIR}"
+test_name = os.path.basename(os.path.dirname(FRAMES_DIR.rstrip('/'))) or 'tracking'
 run_name = f"{test_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
-OUTPUT_DIR = os.path.join("./tracking_out", run_name)
+OUTPUT_DIR = os.path.join(os.path.expanduser(args.output_dir), run_name)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-MAKE_VIDEO = True                            # True -> output.mp4 üretir
-FPS = 25
+MAKE_VIDEO = args.make_video
+FPS = args.fps
 
-# YOLO model (drone tespiti için kendi ağırlığın varsa onu kullan)
-YOLO_WEIGHTS = "best.pt"                  # örnek
-YOLO_CONF    = 0.25
-YOLO_IOU     = 0.5
-YOLO_IMGSZ   = 1280
+YOLO_WEIGHTS = os.path.expanduser(args.yolo_weights)
+YOLO_CONF    = args.yolo_conf
+YOLO_IOU     = args.yolo_iou
+YOLO_IMGSZ   = args.yolo_imgsz
 
-# ReID (RotTrans)
-CFG_FILE     = "configs/UAV-Swarm/vit_transreid_stride_384.yml"
-REID_WEIGHT  = "/home/fatih/github/RotTrans/output/UAVSwarm_train/transformer_50.pth"
-NUM_CLASS    = 122                           # eğitiminle uyumluysa; sadece feature istiyoruz zaten
-COS_THRESH   = 0.55                          # ReID eşiği (0.6–0.8 arası deneyin)
-IOU_THRESH   = 0.3                           # kısa kopmalarda IoU ile eşleştirme
-LOST_TTL     = 10.0                          # sn: bu süreden uzun kayıpları unut
-EMA_ALPHA    = 0.8                           # feat güncelleme
+CFG_FILE     = args.cfg_file
+REID_WEIGHT  = os.path.expanduser(args.reid_weight)
+NUM_CLASS    = args.num_class
+COS_THRESH   = args.cos_thresh
+IOU_THRESH   = args.iou_thresh
+LOST_TTL     = args.lost_ttl
+EMA_ALPHA    = args.ema_alpha
 ########################################
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

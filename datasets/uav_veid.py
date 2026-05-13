@@ -14,15 +14,18 @@ from .bases import BaseImageDataset
 
 class UAVVeID(BaseImageDataset):
 
-    def __init__(self, root='/data0/ReIDData/',
+    def __init__(self, root='./data',
                  verbose=False, **kwargs):
         super(UAVVeID, self).__init__()
-        self.dataset_dir = '/data0/ReIDData/UAV-VeID/'
+        root = os.environ.get('REID_DATA_ROOT', root)
+        root = osp.expanduser(root)
+        base = osp.join(root, 'UAV-VeID') if osp.isdir(osp.join(root, 'UAV-VeID')) else root
+        self.dataset_dir = base
 
-        self.train_dir = '/data0/ReIDData/UAV-VeID/train'
+        self.train_dir = osp.join(base, 'train')
 
-        self.query_dir = '/data0/ReIDData/UAV-VeID/query/'
-        self.gallery_dir = '/data0/ReIDData/UAV-VeID/gallery/'
+        self.query_dir = osp.join(base, 'query')
+        self.gallery_dir = osp.join(base, 'gallery')
 
         self._check_before_run()
 

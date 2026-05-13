@@ -1,6 +1,6 @@
 MODEL:
   PRETRAIN_CHOICE: 'imagenet'
-  PRETRAIN_PATH: '/home/chenshuoyi/.cache/torch/checkpoints/jx_vit_base_p16_384-83fb41ba.pth'
+  PRETRAIN_PATH: '~/.cache/torch/checkpoints/jx_vit_base_p16_384-83fb41ba.pth'
   METRIC_LOSS_TYPE: 'triplet'
   IF_LABELSMOOTH: 'off'
   IF_WITH_CENTER: 'no'

@@ -1,2 +1,6 @@
 .agents/
 skills-lock.json
+__pycache__/
+*.pyc
+*.pyo
+*.pyd

@@ -39,24 +39,24 @@ class UAVSwarmDataset:
             if not (os.path.isdir(img_dir) and os.path.isdir(gt_dir)):
                 continue
             
-            # GT dosyalarını oku (her frame için)
-            for gt_file in sorted(os.listdir(gt_dir)):
-                gt_path = os.path.join(gt_dir, gt_file)
-                frame_id = os.path.splitext(gt_file)[0]
-                
-                # Her gt dosyası satır satır, her satır bir obje
-                with open(gt_path, 'r') as f:
-                    for line in f.readlines():
-                        # line formatı örnek: 
-                        # id, frame, x, y, w, h, conf, type, visibility
+            # Sadece gt.txt oku. gt_train_half.txt / gt_val_half.txt aynı
+            # detection'ları farklı bölüntülerde tekrar içeriyor; üçünü birden
+            # okumak her örneği ~2x sayar.
+            gt_path = os.path.join(gt_dir, 'gt.txt')
+            if not os.path.isfile(gt_path):
+                continue
+            frame_id = 'gt'
+
+            with open(gt_path, 'r') as f:
+                for line in f.readlines():
+                        # MOT format: frame, id, x, y, w, h, conf, cls, vis
                         parts = line.strip().split(',')
                         if len(parts) < 9:
                             continue
-                        pid = int(parts[0])
-                        frame_number = parts[1]  # zaten dosya ismi ile aynı olabilir
-                        
-                        # Görüntü dosyası yolu (örnek): img1/000001.jpg
-                        img_name = f"{int(frame_number):06d}.jpg"
+                        frame_number = int(parts[0])
+                        pid = int(parts[1])
+
+                        img_name = f"{frame_number:06d}.jpg"
                         img_path = os.path.join(img_dir, img_name)
                         
                         if not os.path.exists(img_path):

@@ -68,7 +68,6 @@ def make_dataloader(cfg):
     train_set = ImageDataset(dataset.train, train_transforms)
     train_set_normal = ImageDataset(dataset.train, val_transforms)
     num_classes = dataset.num_train_pids
-    num_classes = num_classes + 1
     cam_num = dataset.num_train_cams
     view_num = dataset.num_train_vids
 

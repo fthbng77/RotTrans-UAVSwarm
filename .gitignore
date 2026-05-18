@@ -1,6 +1,41 @@
 .agents/
 skills-lock.json
+.venv/
+
+# Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Local data and experiment outputs
+data/
+logs/
+log/
+output/
+outputs/
+results/
+runs/
+checkpoints/
+weights/
+*.pth
+*.pt
+*.onnx
+
+
+install.ps1

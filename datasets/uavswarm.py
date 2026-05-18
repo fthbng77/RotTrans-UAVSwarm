@@ -1,6 +1,7 @@
 import os
 from .bases import BaseImageDataset
 import pdb
+import torch
 
 class UAVSwarmDataset:
     def __init__(self, root='./data', **kwargs):
@@ -15,6 +16,7 @@ class UAVSwarmDataset:
                 f"Expected layout: <root>/train/UAVSwarm-XX/{{img1,gt}}/"
             )
         self.train = self.load_train()
+        self.train = self.relabel_train_pids(self.train)
         all_ids = [pid for _, pid, _, _ in self.train]
         print(f"[DEBUG] Max label in dataset: {max(all_ids)}, Total unique IDs: {len(set(all_ids))}")
 
@@ -68,6 +70,10 @@ class UAVSwarmDataset:
                         data.append((img_path, pid, camid, frame_id))
         
         return data
+
+    def relabel_train_pids(self, data):
+        pid2label = {pid: label for label, pid in enumerate(sorted({pid for _, pid, _, _ in data}))}
+        return [(img_path, pid2label[pid], camid, frame_id) for img_path, pid, camid, frame_id in data]
 
     def get_num_pids(self):
         pids = set()

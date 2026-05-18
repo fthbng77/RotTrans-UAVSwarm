@@ -2,6 +2,7 @@ import os
 from collections import defaultdict
 from .bases import BaseImageDataset
 import pdb
+import torch
 
 class UAVSwarmDataset:
     # Test query/gallery split parametreleri.
@@ -33,6 +34,7 @@ class UAVSwarmDataset:
         self.root = self.train_root
 
         self.train = self.load_train()
+        self.train = self.relabel_train_pids(self.train)
         all_ids = [pid for _, pid, _, _ in self.train]
         print(f"[DEBUG] Train: Max label {max(all_ids)}, Total unique IDs {len(set(all_ids))}")
 
@@ -153,6 +155,12 @@ class UAVSwarmDataset:
                     gallery.append((p, global_pid, 1, frame_id))
 
         return query, gallery
+
+    def relabel_train_pids(self, data):
+        # load_train zaten contiguous 0..N-1 pid üretiyor; bu metod
+        # remote'tan gelen no-op uyumluluk sarmalayıcısı.
+        pid2label = {pid: label for label, pid in enumerate(sorted({pid for _, pid, _, _ in data}))}
+        return [(img_path, pid2label[pid], camid, frame_id) for img_path, pid, camid, frame_id in data]
 
     def get_num_pids(self):
         pids = set()

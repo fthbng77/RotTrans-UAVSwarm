@@ -55,12 +55,12 @@ def do_train(cfg,
             target_cam = target_cam.to(device)
             target_view = target_view.to(device)
             with amp.autocast(device_type='cuda', dtype=torch.float16):
-                score, feat = model(img, target, cam_label=target_cam, view_label=target_view)
+                score, feat = model(img, target)
                 #print("target tensor:", target)
                 #print("target dtype:", target.dtype)
                 #print("target shape:", target.shape)
                 #print("min target:", target.min().item(), "max target:", target.max().item())
-                loss = loss_fn(score, feat, target, target_cam)
+                loss = loss_fn(score, feat, target)
 
             scaler.scale(loss).backward()
 

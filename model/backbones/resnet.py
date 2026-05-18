@@ -125,11 +125,23 @@ class ResNet(nn.Module):
         return x
 
     def load_param(self, model_path):
-        param_dict = torch.load(model_path)
-        for i in param_dict:
-            if 'fc' in i:
-                continue
-            self.state_dict()[i].copy_(param_dict[i])
+        param_dict = torch.load(model_path, map_location="cpu")
+
+        if "model" in param_dict:
+            param_dict = param_dict["model"]
+
+        model_dict = self.state_dict()
+
+        param_dict = {
+            k: v for k, v in param_dict.items()
+            if k in model_dict
+            and model_dict[k].shape == v.shape
+            and "fc" not in k
+            and "head" not in k
+        }
+
+        model_dict.update(param_dict)
+        self.load_state_dict(model_dict)
 
     def random_init(self):
         for m in self.modules():

@@ -41,3 +41,4 @@ weights/
 *.onnx
 
 install.ps1
+data/**/*.bak

@@ -1,6 +1,12 @@
 # RotTrans-UAVSwarm
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/fthbng77/RotTrans-UAVSwarm/blob/main/ReidModelTrain.ipynb)
+
 Vision Transformer tabanli, rotasyon ve translasyon arttirimli (augmentation) bir **Person Re-Identification (ReID)** sistemi. UAV (Insansiz Hava Araci) suru senaryolarina yonelik olarak gelistirilmistir.
+
+## Hizli Baslangic (Colab)
+
+Yukaridaki **Open In Colab** rozetine tikla. Notebook sirayla: bagimliliklari kurar, repoyu klonlar (GitHub token ister), DeiT-Small pretrain agirligini indirir, Google Drive'i baglar ve egitimi `OUTPUT_DIR=/content/drive/MyDrive/rottrans_out` ile baslatir. Checkpoint'ler Drive'a yazilir.
 
 ## Genel Bakis
 

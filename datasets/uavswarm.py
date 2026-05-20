@@ -35,12 +35,12 @@ class UAVSwarmDataset:
 
         self.train = self.load_train()
         self.train = self.relabel_train_pids(self.train)
-        all_ids = [pid for _, pid, _, _ in self.train]
+        all_ids = [t[1] for t in self.train]
         print(f"[DEBUG] Train: Max label {max(all_ids)}, Total unique IDs {len(set(all_ids))}")
 
         if os.path.isdir(self.test_root):
             self.query, self.gallery = self.load_test_query_gallery()
-            test_pids = set(pid for _, pid, _, _ in self.query)
+            test_pids = set(t[1] for t in self.query)
             print(f"[DEBUG] Test : {len(test_pids)} drones, {len(self.query)} query, {len(self.gallery)} gallery")
         else:
             print(f"[WARN] Test root '{self.test_root}' not found, query/gallery empty.")
@@ -86,6 +86,7 @@ class UAVSwarmDataset:
                         continue
                     frame_number = int(parts[0])
                     local_pid = int(parts[1])
+                    x, y, w, h = (int(float(v)) for v in parts[2:6])
 
                     key = (folder_name, local_pid)
                     if key not in pid_map:
@@ -99,7 +100,8 @@ class UAVSwarmDataset:
                         continue
 
                     camid = 0
-                    data.append((img_path, global_pid, camid, frame_id))
+                    # 5. eleman bbox = (x, y, w, h); ImageDataset crop yapar.
+                    data.append((img_path, global_pid, camid, frame_id, (x, y, w, h)))
 
         return data
 
@@ -134,11 +136,12 @@ class UAVSwarmDataset:
                         continue
                     frame_number = int(parts[0])
                     local_pid = int(parts[1])
+                    x, y, w, h = (int(float(v)) for v in parts[2:6])
                     img_name = f"{frame_number:06d}.jpg"
                     img_path = os.path.join(img_dir, img_name)
                     if not os.path.exists(img_path):
                         continue
-                    per_drone[local_pid].append((frame_number, img_path))
+                    per_drone[local_pid].append((frame_number, img_path, (x, y, w, h)))
 
             for local_pid, dets in per_drone.items():
                 if len(dets) < self.MIN_DETECTIONS:
@@ -149,23 +152,23 @@ class UAVSwarmDataset:
                     test_pid_map[key] = len(test_pid_map)
                 global_pid = test_pid_map[key]
                 split = max(1, int(self.QUERY_RATIO * len(dets)))
-                for _, p in dets[:split]:
-                    query.append((p, global_pid, 0, frame_id))
-                for _, p in dets[split:]:
-                    gallery.append((p, global_pid, 1, frame_id))
+                for _, p, bbox in dets[:split]:
+                    query.append((p, global_pid, 0, frame_id, bbox))
+                for _, p, bbox in dets[split:]:
+                    gallery.append((p, global_pid, 1, frame_id, bbox))
 
         return query, gallery
 
     def relabel_train_pids(self, data):
         # load_train zaten contiguous 0..N-1 pid üretiyor; bu metod
-        # remote'tan gelen no-op uyumluluk sarmalayıcısı.
-        pid2label = {pid: label for label, pid in enumerate(sorted({pid for _, pid, _, _ in data}))}
-        return [(img_path, pid2label[pid], camid, frame_id) for img_path, pid, camid, frame_id in data]
+        # remote'tan gelen no-op uyumluluk sarmalayıcısı. 5. eleman bbox korunur.
+        pid2label = {pid: label for label, pid in enumerate(sorted({t[1] for t in data}))}
+        return [(t[0], pid2label[t[1]], *t[2:]) for t in data]
 
     def get_num_pids(self):
         pids = set()
-        for _, pid, _, _ in self.train:
-            pids.add(pid)
+        for t in self.train:
+            pids.add(t[1])
         return len(pids)
 
     def load_param(self, model_path):

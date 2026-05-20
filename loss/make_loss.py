@@ -32,7 +32,7 @@ def make_loss(cfg, num_classes):    # modified by gu
         print("label smooth on, numclasses:", num_classes)
 
     if sampler == 'softmax':
-        def loss_func(score, feat, target):
+        def loss_func(score, feat, target, target_cam=None):
             return F.cross_entropy(score, target)
 
     elif cfg.DATALOADER.SAMPLER == 'softmax_triplet':

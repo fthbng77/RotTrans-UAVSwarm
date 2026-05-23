@@ -31,12 +31,10 @@ data/test_backup/
 logs/
 log/
 output/
-outputs/
 results/
 runs/
 checkpoints/
 weights/
-*.pth
 *.pt
 *.onnx
 
